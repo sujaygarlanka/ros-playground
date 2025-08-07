@@ -7,19 +7,4 @@ moveit_setup_assistant_config:
   package_settings:
     author_name: Sujay Garlanka
     author_email: sujay.garlanka@gmail.com
-    generated_timestamp: 1737764970
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
-  modified_urdf:
-    xacros:
-      - control_xacro
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
+    generated_timestamp: 1738367855

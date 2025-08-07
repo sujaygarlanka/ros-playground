@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'isaacsim'
+package_name = 'isaac_sim'
 
 setup(
     name=package_name,
@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'node = isaac_sim.node:main',
         ],
     },
 )

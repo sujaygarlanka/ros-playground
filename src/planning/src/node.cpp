@@ -161,7 +161,7 @@ trajectory_msgs::msg::JointTrajectory planning_func(std::shared_ptr<rclcpp::Node
     std::vector<double> tolerance_pose(3, 0.01);
     std::vector<double> tolerance_angle(3, 0.01);
     moveit_msgs::msg::Constraints pose_goal =
-      kinematic_constraints::constructGoalConstraints("fr3_link7", pose, tolerance_pose, tolerance_angle);
+      kinematic_constraints::constructGoalConstraints("fr3_link8", pose, tolerance_pose, tolerance_angle);
 
     req.group_name = PLANNING_GROUP;
     req.goal_constraints.push_back(pose_goal);
@@ -188,11 +188,9 @@ trajectory_msgs::msg::JointTrajectory planning_func(std::shared_ptr<rclcpp::Node
 void handle_plan_service(const std::shared_ptr<custom_interfaces::srv::AddThreeInts::Request> request,
          std::shared_ptr<custom_interfaces::srv::AddThreeInts::Response> response)
 {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Request received");
     trajectory_msgs::msg::JointTrajectory traj = planning_func(motion_planning_node, request->position, request->quaternion, request->joint_state);
     response->trajectory = traj;
-    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Incoming request\na: %ld" " b: %ld",
-    //             request->a, request->b);
-    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "sending back response: [%ld]", (long int)response->sum);
 }
 
 int main(int argc, char** argv)

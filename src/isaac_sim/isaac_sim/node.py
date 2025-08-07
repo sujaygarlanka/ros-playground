@@ -28,6 +28,10 @@ from omni.isaac.franka import Franka
 from omni.isaac.core.utils.rotations import euler_angles_to_quat
 from omni.isaac.core.objects import VisualSphere
 
+import omni.appwindow
+import carb.input
+from carb.input import KeyboardEventType
+
 # from omni.kit.input import get_input
 
 import numpy as np
@@ -39,14 +43,13 @@ from geometry_msgs.msg import Point, Quaternion
 from custom_interfaces.srv import AddThreeInts
 from collections import deque
 
-# import keyboard
-
 # Initialize the world
 world = World(stage_units_in_meters=1.0)
 world.scene.add_default_ground_plane()
 
 # Add the Panda robot
 franka = world.scene.add(Franka(prim_path="/World/Fancy_Franka", name="fancy_franka"))
+franka_2 = world.scene.add(Franka(prim_path="/World/Fancy_Franka_2", name="fancy_franka_2"))
 
 # Add a dynamic cuboid
 world.scene.add(
@@ -64,15 +67,28 @@ marker = world.scene.add(
         prim_path="/World/moving_marker",
         name="moving_marker",
         position=np.array([0.0, 0.0, 0.5]),  # Initial position
-        radius=0.5,
+        radius=0.1,
         color=np.array([1.0, 0.0, 0.0]),
     )
 )
 
+def on_keyboard_input(e):
+    # marker.set_world_pose(np.array([1.0, 1.0, 1.0]))
+    if e.input == carb.input.KeyboardInput.M:
+        node.send_request()
+        # if e.type == KeyboardEventType.KEY_PRESS or e.type == KeyboardEventType.KEY_REPEAT:
+        #     self.handle_key_pressed(e.input)
+        # elif e.type == KeyboardEventType.KEY_RELEASE:
+        #     self.handle_key_released(e.input)
+
+app_window = omni.appwindow.get_default_app_window()
+keyboard = app_window.get_keyboard()
+input = carb.input.acquire_input_interface()
+keyboard_sub_id = input.subscribe_to_keyboard_events(keyboard, on_keyboard_input)
+
 # Reset the world
 world.reset()
 action_queue = deque()
-
 
 def get_socket_info():
     import socket
@@ -84,11 +100,11 @@ def get_socket_info():
     return f"http://{ip}:8211/streaming/webrtc-demo/?server={ip}"
 
 
-def on_keyboard_event(event):
-    if event.type == "KEY_DOWN":  # Detect a key press
-        if event.key == "s":  # Replace 'K' with your desired key
-            print("Key 's' pressed. Triggering action...")
-            node.send_request()
+# def on_keyboard_event(event):
+#     if event.type == "KEY_DOWN":  # Detect a key press
+#         if event.key == "s":  # Replace 'K' with your desired key
+#             print("Key 's' pressed. Triggering action...")
+#             node.send_request()
 
 
 # Class for a ROS 2 service node
@@ -108,15 +124,20 @@ class PlanningService(Node):
     def send_request(self):
         # Fill in the request data
         point = Point()
-        point.x = 0.3
-        point.y = 0.3
-        point.z = 0.3
-        marker.set_world_pose(np.array([point.x, point.y, point.z]))
+        # point.x = 0.5
+        # point.y = 0.3
+        # point.z = 0.3
+        # marker.set_world_pose(np.array([point.x, point.y, point.z]))
+        position, _ = marker.get_world_pose()
+        point = Point()
+        point.x = float(position[0])
+        point.y = float(position[1])
+        point.z = float(position[2])
         self.request.position = point
 
         # Define Euler angles in radians (roll, pitch, yaw)
         roll = 0.0  # Rotation about X-axis
-        pitch = 3.14  # Rotation about Y-axis
+        pitch = 0.0  # Rotation about Y-axis
         yaw = 0.0  # Rotation about Z-axis (90 degrees)
 
         # Convert Euler angles to quaternion
@@ -153,7 +174,7 @@ class PlanningService(Node):
 # Initialize ROS 2 and create the node
 rclpy.init()  # Initialize the ROS 2 Python client library
 node = PlanningService(franka)
-node.send_request()
+# node.send_request()
 
 # Subscribe to keyboard events
 
